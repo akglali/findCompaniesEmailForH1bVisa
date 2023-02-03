@@ -10,5 +10,5 @@ func main() {
 	//time to find companies email if it is existed and save them to use it.
 	//companiesEmail.FindEmail()
 	sendEmailToFoundCompanies.SendEmail()
-	//sendEmailToFoundCompanies.EmailTemplate("AKGL", "akgol97_@hotmail.com")
+
 }

@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func SendEmail() {
@@ -28,24 +29,31 @@ func SendEmail() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Set timer for 5 minute
+	timer := time.After(5 * time.Minute)
 	nonEmailCount := 1
 	rows, err := f.GetRows("Sheet1")
-	for _, row := range rows {
+	for index, row := range rows {
 		companyName := row[1]
 		companyEmails := row[4]
 		companyWebsite := row[3]
+
 		if companyEmails != "[]" {
+			if (index+1)%50 == 0 {
+				// Wait for timer to finish
+				<-timer
+			}
 			// Remove square brackets from string
 			array := companyEmails[1 : len(companyEmails)-1]
 
 			// Split the string into a slice of strings using the space character as a delimiter
 
 			emailArray := strings.Split(array, " ")
-			fmt.Println(len(emailArray))
+
 			if len(emailArray) != 0 {
 				for _, email := range emailArray {
-					EmailTemplate(companyName, email)
-
+					emailTemplate(companyName, email)
+					fmt.Println(email, index)
 				}
 			}
 		} else {
@@ -68,7 +76,8 @@ func SendEmail() {
 
 //by default, it is .env, so we don't have to write
 
-func EmailTemplate(companyName, email string) {
+func emailTemplate(companyName, email string) {
+	fmt.Println(email)
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println("Something went wrong with env file Env file ")
@@ -139,7 +148,7 @@ func EmailTemplate(companyName, email string) {
 	// Send the email
 	err = smtp.SendMail(host+":"+port, auth, from, []string{to}, message.Bytes())
 	if err != nil {
-		fmt.Println("Email Couldn't send" + companyName)
+		fmt.Println("Email Couldn't send" + companyName + err.Error())
 		return
 	}
 	saveCompaniesThatReceivedEmails(companyName, email)
