@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/smtp"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -21,23 +22,45 @@ func SendEmail() {
 		return
 	}
 
-	f, err := excelize.OpenFile("employerH1B.xlsx")
+	emptyEmailFile := excelize.NewFile()
 
+	f, err := excelize.OpenFile("employerH1B.xlsx")
 	if err != nil {
 		log.Fatal(err)
 	}
+	nonEmailCount := 1
 	rows, err := f.GetRows("Sheet1")
 	for _, row := range rows {
-		//companyName := row[1]
+		companyName := row[1]
 		companyEmails := row[4]
+		companyWebsite := row[3]
+		if companyEmails != "[]" {
+			// Remove square brackets from string
+			array := companyEmails[1 : len(companyEmails)-1]
 
-		// Remove square brackets from string
-		array := companyEmails[1 : len(companyEmails)-1]
+			// Split the string into a slice of strings using the space character as a delimiter
 
-		// Split the string into a slice of strings using the space character as a delimiter
-		emailArray := strings.Split(array, " ")
-		for i, email := range emailArray {
-			fmt.Println(i, email)
+			emailArray := strings.Split(array, " ")
+			fmt.Println(len(emailArray))
+			if len(emailArray) != 0 {
+				for _, email := range emailArray {
+					EmailTemplate(companyName, email)
+
+				}
+			}
+		} else {
+			cellA := "A" + strconv.Itoa(nonEmailCount)
+			cellB := "B" + strconv.Itoa(nonEmailCount)
+			if err := emptyEmailFile.SetCellValue("Sheet1", cellA, companyName); err != nil {
+				fmt.Println("cellA")
+			}
+			if err := emptyEmailFile.SetCellValue("Sheet1", cellB, companyWebsite); err != nil {
+				fmt.Println("cellB")
+			}
+			if err := emptyEmailFile.SaveAs("nonEmailFile.xlsx"); err != nil {
+				log.Fatal(err)
+			}
+			nonEmailCount += 1
 		}
 
 	}
@@ -58,7 +81,7 @@ func EmailTemplate(companyName, email string) {
 	name := "Ali Akgol"
 	body := "To Whom It May Concern,\n\n" +
 		"I hope this email finds you well. I am writing to express my interest in a software engineering role at " + companyName +
-		" As a recently graduated computer engineer with a 3.35 GPA, I am eager to put my skills and knowledge to use in a challenging and dynamic work environment." +
+		". As a recently graduated computer engineer with a 3.35 GPA, I am eager to put my skills and knowledge to use in a challenging and dynamic work environment." +
 		"\n\nOne of my main objectives is to pursue a career in the United States, and I believe that " + companyName + " would provide me with the opportunities I am seeking." +
 		" I am highly motivated, ambitious and eager to take on new challenges, and I believe that I would be an asset to your team.\n\n" +
 		"I have a strong foundation in various programming languages such as Go, Java, Python, TypeScript, JavaScript, SQL, and Dart." +
@@ -118,6 +141,30 @@ func EmailTemplate(companyName, email string) {
 		fmt.Println("Email Couldn't send" + companyName)
 		return
 	}
-
+	saveCompaniesThatReceivedEmails(companyName, email)
 	fmt.Println("Email sent successfully!")
+}
+
+var count = 0
+var sendEmailCompanies = excelize.NewFile()
+
+func saveCompaniesThatReceivedEmails(companyName, email string) {
+	count = count + 1
+	cellA := "A" + strconv.Itoa(count)
+	cellB := "B" + strconv.Itoa(count)
+
+	err := sendEmailCompanies.SetCellValue("Sheet1", cellA, companyName)
+	if err != nil {
+		fmt.Println("cella", err.Error())
+		return
+	}
+	err = sendEmailCompanies.SetCellValue("Sheet1", cellB, email)
+	if err != nil {
+		fmt.Println("cella", err.Error())
+		return
+	}
+	if err := sendEmailCompanies.SaveAs("successfulEmails.xlsx"); err != nil {
+		log.Fatal(err)
+	}
+
 }
