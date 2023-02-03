@@ -34,13 +34,14 @@ func SendEmail() {
 
 	nonEmailCount := 1
 	rows, err := f.GetRows("Sheet1")
+	startTimer := 0
 	for index, row := range rows {
 		companyName := row[1]
 		companyEmails := row[4]
 		companyWebsite := row[3]
-
+		startTimer += 1
 		if companyEmails != "[]" {
-			if (index+1)%50 == 0 {
+			if startTimer%50 == 0 {
 				// Wait for timer to finish because otherwise smtp error will raise for requesting too much email
 				<-timer
 				// need to set timer again otherwise it causes deadlock (all goroutines are asleep)
