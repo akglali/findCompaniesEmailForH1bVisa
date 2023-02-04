@@ -30,22 +30,20 @@ func SendEmail() {
 		log.Fatal(err)
 	}
 	// Set timer for 5 minute
-	timer := time.After(3 * time.Minute)
 
 	nonEmailCount := 1
 	rows, err := f.GetRows("Sheet1")
 	startTimer := 0
 	for index, row := range rows {
+		timer := time.After(5 * time.Minute)
 		companyName := row[1]
 		companyEmails := row[4]
 		companyWebsite := row[3]
-		startTimer += 1
 		if companyEmails != "[]" {
+			startTimer += 1
 			if startTimer%50 == 0 {
 				// Wait for timer to finish because otherwise smtp error will raise for requesting too much email
 				<-timer
-				// need to set timer again otherwise it causes deadlock (all goroutines are asleep)
-				timer = time.After(3 * time.Minute)
 			}
 			// Remove square brackets from string
 			array := companyEmails[1 : len(companyEmails)-1]
