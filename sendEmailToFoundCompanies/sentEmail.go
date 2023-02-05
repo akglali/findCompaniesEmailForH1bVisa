@@ -61,7 +61,7 @@ func SendEmail() {
 						fmt.Println("don't send", email)
 					} else {
 						fmt.Println(email, index)
-						//emailTemplate(companyName, email)
+						emailTemplate(companyName, email)
 
 					}
 				}
