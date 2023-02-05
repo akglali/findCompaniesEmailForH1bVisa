@@ -35,15 +35,18 @@ func SendEmail() {
 	rows, err := f.GetRows("Sheet1")
 	startTimer := 0
 	for index, row := range rows {
-		timer := time.After(5 * time.Minute)
+		timer := time.After(5 * time.Second)
 		companyName := row[1]
 		companyEmails := row[4]
 		companyWebsite := row[3]
 		if companyEmails != "[]" {
 			startTimer += 1
-			if startTimer%50 == 0 {
+			fmt.Println("Start Timer", startTimer)
+			if startTimer%30 == 0 {
+				fmt.Println("stopped")
 				// Wait for timer to finish because otherwise smtp error will raise for requesting too much email
 				<-timer
+
 			}
 			// Remove square brackets from string
 			array := companyEmails[1 : len(companyEmails)-1]
@@ -54,8 +57,13 @@ func SendEmail() {
 
 			if len(emailArray) != 0 {
 				for _, email := range emailArray {
-					emailTemplate(companyName, email)
-					fmt.Println(email, index)
+					if strings.HasSuffix(email, ".png") || strings.HasSuffix(email, "wixpress.com") {
+						fmt.Println("don't send", email)
+					} else {
+						fmt.Println(email, index)
+						//emailTemplate(companyName, email)
+
+					}
 				}
 			}
 		} else {
