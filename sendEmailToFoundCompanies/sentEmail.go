@@ -35,14 +35,14 @@ func SendEmail() {
 	rows, err := f.GetRows("Sheet1")
 	startTimer := 0
 	for index, row := range rows {
-		timer := time.After(5 * time.Second)
+		timer := time.After(3 * time.Minute)
 		companyName := row[1]
 		companyEmails := row[4]
 		companyWebsite := row[3]
 		if companyEmails != "[]" {
 			startTimer += 1
 			fmt.Println("Start Timer", startTimer)
-			if startTimer%30 == 0 {
+			if startTimer%80 == 0 {
 				fmt.Println("stopped")
 				// Wait for timer to finish because otherwise smtp error will raise for requesting too much email
 				<-timer
@@ -57,7 +57,7 @@ func SendEmail() {
 
 			if len(emailArray) != 0 {
 				for _, email := range emailArray {
-					if strings.HasSuffix(email, ".png") || strings.HasSuffix(email, "wixpress.com") {
+					if strings.HasSuffix(email, ".png") || strings.HasSuffix(email, "wixpress.com") || strings.HasSuffix(email, ".jpg") || strings.HasSuffix(email, ".jpeg") {
 						fmt.Println("don't send", email)
 					} else {
 						fmt.Println(email, index)
