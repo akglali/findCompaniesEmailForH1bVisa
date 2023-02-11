@@ -35,14 +35,14 @@ func SendEmail() {
 	rows, err := f.GetRows("Sheet1")
 	startTimer := 0
 	for index, row := range rows {
-		timer := time.After(3 * time.Minute)
+		timer := time.After(4 * time.Minute)
 		companyName := row[1]
 		companyEmails := row[4]
 		companyWebsite := row[3]
 		if companyEmails != "[]" {
 			startTimer += 1
 			fmt.Println("Start Timer", startTimer)
-			if startTimer%80 == 0 {
+			if startTimer%40 == 0 {
 				fmt.Println("stopped")
 				// Wait for timer to finish because otherwise smtp error will raise for requesting too much email
 				<-timer
@@ -110,10 +110,7 @@ func emailTemplate(companyName, email string) {
 		"to have the opportunity to bring my skills and experience to your team and to be a part of a company that is making a difference in the industry.\n\n" +
 		"I would appreciate the opportunity to discuss my qualifications and how I can contribute to the success of your company. I am available for an interview at your convenience. " +
 		"I have attached my resume and portfolio for your review.\n\n" +
-		"I was searching for a company that offers H1B visa sponsorship, and I came across the website h1bgrader," +
-		" which lists all the companies that have sponsored visas in the past. However, the website did not provide any " +
-		"email addresses to contact these companies. So, I teamed up with my friend Sultan and wrote a code to find the websites" +
-		" of these companies using their names. We then searched for email addresses on these websites by writing a function that" +
+		"NOTE: I was searching for a company that can offer me H1B visa sponsorship," + "We then searched for email addresses on these websites by writing a function that" +
 		" searched for them in the text. To send the emails, we created a template email and wrote another function to send the emails. " +
 		"Although writing the code wasn't particularly difficult, I believe it demonstrates my dedication and determination to make my dream of" +
 		" starting my career in the US a reality. The code is available on GitHub! \n\n" +

@@ -1,4 +1,4 @@
-package companiesWebsites
+package googleMapsSearch
 
 import (
 	"fmt"
@@ -11,10 +11,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func FindWebsites() {
-	f, err := excelize.OpenFile("employerH1B.xlsx")
+	f, err := excelize.OpenFile("employerForMapSearch.xlsx")
 
 	if err != nil {
 		log.Fatal(err)
@@ -23,24 +24,37 @@ func FindWebsites() {
 	rows, err := f.GetRows("Sheet1")
 
 	for index, row := range rows {
+		fmt.Println(index)
+		if len(row) < 2 {
+			done := make(chan string)
+			go func() {
+				companyName := row[0]
+				companyUrl := bingSearch(companyName)
+				done <- companyUrl
+			}()
+			select {
+			case companyUrl := <-done:
+				cellB := "B" + strconv.Itoa(index+1)
+				err := f.SetCellValue("Sheet1", cellB, companyUrl)
+				if err != nil {
+					fmt.Println("cella", err.Error())
+					return
+				}
+				err = f.SaveAs("employerForMapSearch.xlsx")
+				if err != nil {
+					fmt.Println("saving error", err.Error())
+					return
+				}
+			case <-time.After(15 * time.Second):
+				fmt.Println("timed out")
+				continue
 
-		companyName := row[1]
-		companyUrl := bingSearch(companyName)
-		cellD := "D" + strconv.Itoa(index+1)
-		err = f.SetCellValue("Sheet1", cellD, companyUrl)
-		if err != nil {
-			fmt.Println("cella", err.Error())
-			return
+			}
 		}
-		err = f.SaveAs("employerH1B.xlsx")
-		if err != nil {
-			fmt.Println("saving error", err.Error())
-			return
-		}
+
 	}
 
 }
-
 func findCompanyWebsiteForBingUrl(url string) string {
 	res, err := http.Get(url)
 	if err != nil {
